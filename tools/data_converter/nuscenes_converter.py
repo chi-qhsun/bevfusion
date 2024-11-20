@@ -93,11 +93,11 @@ def create_nuscenes_infos(root_path,
             len(train_nusc_infos), len(val_nusc_infos)))
         data = dict(infos=train_nusc_infos, metadata=metadata)
         info_path = osp.join(info_prefix,
-                             '{}_infos_train_radar.pkl'.format(info_prefix))
+                             '{}_infos_train.pkl'.format(info_prefix))
         mmcv.dump(data, info_path)
         data['infos'] = val_nusc_infos
         info_val_path = osp.join(info_prefix,
-                                 '{}_infos_val_radar.pkl'.format(info_prefix))
+                                 '{}_infos_val.pkl'.format(info_prefix))
         mmcv.dump(data, info_val_path)
 
 
@@ -177,7 +177,11 @@ def _fill_trainval_infos(nusc,
         lidar_path, boxes, _ = nusc.get_sample_data(lidar_token)
 
         mmcv.check_file_exist(lidar_path)
-
+       
+        location = nusc.get(
+        "log", nusc.get("scene", sample["scene_token"])["log_token"]
+        )["location"]
+       
         info = {
             'lidar_path': lidar_path,
             'token': sample['token'],
@@ -189,7 +193,8 @@ def _fill_trainval_infos(nusc,
             'ego2global_translation': pose_record['translation'],
             'ego2global_rotation': pose_record['rotation'],
             'timestamp': sample['timestamp'],
-            'prev_token': sample['prev']
+            'prev_token': sample['prev'],
+            'location':location
         }
 
         l2e_r = info['lidar2ego_rotation']
